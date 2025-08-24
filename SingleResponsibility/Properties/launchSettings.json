@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SingleResponsibility": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "dev"
+      }
+    }
+  }
+}

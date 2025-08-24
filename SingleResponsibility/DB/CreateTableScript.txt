@@ -1,0 +1,8 @@
+﻿CREATE SCHEMA solid;
+GO
+
+CREATE TABLE solid.Invoice (
+    InvoiceId INT IDENTITY(1,1) PRIMARY KEY,
+    Details NVARCHAR(MAX),
+    Total DECIMAL(18, 2)
+);
