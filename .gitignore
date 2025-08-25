@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/SingleResponsibility.Tests/bin/Debug/net9.0
+/SingleResponsibility.Tests/obj
+/SingleResponsibility/bin/Debug/net9.0
+/SingleResponsibility/obj
+*.json
