@@ -1,4 +1,4 @@
-namespace SingleResponsibility.BadDesign;
+namespace SingleResponsibility.Entities;
 
 public class InvoiceRecord
 {

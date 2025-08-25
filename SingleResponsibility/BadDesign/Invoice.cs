@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using SingleResponsibility.Entities;
 using System.Net;
 using System.Net.Mail; 
 
@@ -9,16 +10,39 @@ public class Invoice
     public int Id { get; private set; }
     private List<InvoiceRecord> Lines { get; } = new();
 
-    public void AddLine(InvoiceRecord line)
+    public void ProcessAndNotify(string connectionString, SmtpSettings smtpSettings, string recipientEmail)
+    {
+        // Bad Design example
+        this.AddLine(new InvoiceRecord("Item 1", 2, 10.00m));
+        this.AddLine(new InvoiceRecord("Item 2", 1, 20.00m));
+        Console.WriteLine($"Total: {this.CalculateTotal()}");
+        Console.WriteLine($"CSV: {this.ToCsv()}");
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException("Connection string 'MyDbConnection' is not configured.");
+        }
+        this.SaveToDatabase(connectionString);
+        Console.WriteLine($"Saved to Database successfully. ID {this.Id}");
+
+        if (smtpSettings == null)
+        {
+            throw new InvalidOperationException("SMTP settings are not configured.");
+        }
+        this.SendEmail(smtpSettings, recipientEmail);
+        Console.WriteLine($"Email to {recipientEmail} sent successfully.");
+    }
+
+    private void AddLine(InvoiceRecord line)
     {
         Lines.Add(line);
     }
 
     // Responsibility 1: Business logic
-    public decimal CalculateTotal() => Lines.Sum(l => l.Total());
+    private decimal CalculateTotal() => Lines.Sum(l => l.Total());
 
     // Responsibility 2: Persistence
-    public void SaveToDatabase(string connectionString)
+    private void SaveToDatabase(string connectionString)
     {
         // No changes to the rest of the file are needed for this specific error.
         using (var connection = new SqlConnection(connectionString))
@@ -41,12 +65,12 @@ public class Invoice
     }
 
     // Responsibility 3: Formatting
-    public string ToCsv() 
+    private string ToCsv() 
         => string.Join(Environment.NewLine,
             Lines.Select(l => $"{l.Description},{l.Quantity},{l.UnitPrice}"));
 
     // Responsibility 4: Notifications/Email
-    public void SendEmail(SmtpSettings smtpSettings, string to)
+    private void SendEmail(SmtpSettings smtpSettings, string to)
     {
         // Send Email
         var mail = new MailMessage(smtpSettings.From, to)

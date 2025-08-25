@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
-using SingleResponsibility.BadDesign;
-
-Invoice invoice = new();
-invoice.AddLine(new InvoiceRecord("Item 1", 2, 10.00m));
-invoice.AddLine(new InvoiceRecord("Item 2", 1, 20.00m));
-Console.WriteLine($"Total: {invoice.CalculateTotal()}");
-Console.WriteLine($"CSV: {invoice.ToCsv()}");
+using Microsoft.Extensions.DependencyInjection;
+using SingleResponsibility.GoodDesign;
+using SingleResponsibility.GoodDesign.Interfaces;
+using BadDesignInvoice = SingleResponsibility.BadDesign.Invoice;
+using GoodDesignInvoice = SingleResponsibility.GoodDesign.Dto.Invoice;
 
 var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
 
@@ -16,21 +14,35 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 // Updated code to handle potential null value for connection string
-string? connectionString = configuration.GetConnectionString("MyDbConnection");
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new InvalidOperationException("Connection string 'MyDbConnection' is not configured.");
-}
-
-invoice.SaveToDatabase(connectionString);
-Console.WriteLine($"Saved to Database successfully. ID {invoice.Id}");
-
+string connectionString = configuration.GetConnectionString("MyDbConnection");
 var smtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
+var recipientEmail = configuration["AppSettings:ToEmail"];
 
-// Ensure smtpSettings is not null before calling SendEmail
-if (smtpSettings == null)
+///  Bad Design setup
+Console.WriteLine("Execution starts, under BAD Design");
+BadDesignMain(connectionString, smtpSettings, recipientEmail);
+
+static void BadDesignMain(string connectionString, SmtpSettings smtpSettings, string recipientEmail)
 {
-    throw new InvalidOperationException("SMTP settings are not configured.");
+    // Bad Design example
+
+    BadDesignInvoice invoice = new();
+    invoice.ProcessAndNotify(connectionString, smtpSettings, recipientEmail);
 }
 
-invoice.SendEmail(smtpSettings, "customeremail@inbox.com");
+/// Good Design setup
+Console.WriteLine("Execution starts, under GOOD Design");
+var services = new ServiceCollection().AddInvoiceServices(connectionString, smtpSettings);
+
+GoodDesignMain(services.BuildServiceProvider(), recipientEmail);
+
+static void GoodDesignMain(IServiceProvider serviceProvider, string recipientEmail)
+{
+    // Good Design example
+    using var scope = serviceProvider.CreateScope();
+    var scopedServices = scope.ServiceProvider;
+    var invoiceService = scopedServices.GetRequiredService<IInvoiceService>();
+    invoiceService.ProcessAndNotify(new GoodDesignInvoice(), recipientEmail);
+}
+
+
