@@ -6,10 +6,10 @@ namespace SingleResponsibility.GoodDesign.Infrastructure
 {
     // Notification responsibility
 
-    public class SmtpEmailSender : IEmailSender
+    public class EmailSender : IEmailSender
     {
         private readonly SmtpSettings _smtpSettings;
-        public SmtpEmailSender(SmtpSettings smtpSettings) => _smtpSettings = smtpSettings;
+        public EmailSender(SmtpSettings smtpSettings) => _smtpSettings = smtpSettings;
 
         // Responsibility 4: Notifications/Email
         public void SendEmail(string subject, string body, string to)

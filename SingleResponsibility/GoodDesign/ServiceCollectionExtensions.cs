@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
             new SqlInvoiceRepository(connectionString));
         services.AddSingleton<IInvoiceFormatter, CsvInvoiceFormatter>();
         services.AddSingleton<IEmailSender>(provider =>
-            new SmtpEmailSender(smtpSettings));
+            new EmailSender(smtpSettings));
         services.AddSingleton<IInvoiceService, InvoiceService>();
 
         return services;
