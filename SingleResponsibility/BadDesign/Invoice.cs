@@ -5,6 +5,8 @@ using System.Net.Mail;
 
 namespace SingleResponsibility.BadDesign;
 
+// class violates SRP => multiple responsibilities logic inside one single class
+// Business Logic + Formatting Logic + Persistence Logic + Notification Logic 
 public class Invoice
 {
     public int Id { get; private set; }
